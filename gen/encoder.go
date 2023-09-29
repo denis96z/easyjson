@@ -306,6 +306,12 @@ func (g *Generator) notEmptyCheck(t reflect.Type, v string) string {
 	switch t.Kind() {
 	case reflect.Slice, reflect.Map:
 		return "len(" + v + ") != 0"
+	case reflect.Struct:
+		val, s := reflect.New(t), "false"
+		for i := 0; i < val.NumField(); i++ {
+			s += " || " + g.notEmptyCheck(val.Field(i).Type(), v+"."+t.Field(i).Name)
+		}
+		return s
 	case reflect.Interface, reflect.Ptr:
 		return v + " != nil"
 	case reflect.Bool:
