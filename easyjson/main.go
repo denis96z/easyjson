@@ -31,6 +31,7 @@ var specifiedName = flag.String("output_filename", "", "specify the filename of 
 var processPkg = flag.Bool("pkg", false, "process the whole package instead of just the given file")
 var disallowUnknownFields = flag.Bool("disallow_unknown_fields", false, "return error if any unknown field in json appeared")
 var skipMemberNameUnescaping = flag.Bool("disable_members_unescape", false, "don't perform unescaping of member names to improve performance")
+var allowOmitEmptyStruct = flag.Bool("allow_omitempty_struct", false, "skip empty struct fields if omitempty tag is present")
 
 func generate(fname string) (err error) {
 	fInfo, err := os.Stat(fname)
@@ -79,6 +80,7 @@ func generate(fname string) (err error) {
 		NoStdMarshalers:          *noStdMarshalers,
 		DisallowUnknownFields:    *disallowUnknownFields,
 		SkipMemberNameUnescaping: *skipMemberNameUnescaping,
+		AllowOmitEmptyStruct:     *allowOmitEmptyStruct,
 		OmitEmpty:                *omitEmpty,
 		LeaveTemps:               *leaveTemps,
 		OutName:                  outName,
