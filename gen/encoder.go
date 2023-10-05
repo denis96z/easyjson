@@ -308,10 +308,22 @@ func (g *Generator) notEmptyCheck(t reflect.Type, v string) string {
 		return "len(" + v + ") != 0"
 	case reflect.Struct:
 		if g.allowOmitEmptyStruct {
-			val, s := reflect.New(t).Elem(), "false"
-			for i := 0; i < val.NumField(); i++ {
-				s += " || " + g.notEmptyCheck(val.Field(i).Type(), v+"."+t.Field(i).Name)
+			val := reflect.New(t).Elem()
+			if val.NumField() == 0 {
+				return "false"
 			}
+
+			s := ""
+			for i := 0; i < val.NumField(); i++ {
+				r := g.notEmptyCheck(val.Field(i).Type(), v+"."+t.Field(i).Name)
+				if r != "false" {
+					s += " || " + g.notEmptyCheck(val.Field(i).Type(), v+"."+t.Field(i).Name)
+				}
+			}
+			if s == "" {
+				return "false"
+			}
+
 			return s
 		}
 		return "true"
