@@ -348,7 +348,11 @@ func (g *Generator) genStructFieldEncoder(t reflect.Type, f reflect.StructField,
 		fmt.Fprintln(g.out, "  {")
 		toggleFirstCondition = false
 	} else {
-		fmt.Fprintln(g.out, "  if", g.notEmptyCheck(f.Type, "in."+f.Name), "{")
+		fmt.Fprintln(
+			g.out, "  if",
+			strings.ReplaceAll(g.notEmptyCheck(f.Type, "in."+f.Name), "|| false", ""),
+			"{",
+		)
 		// can be any in runtime, so toggleFirstCondition stay as is
 	}
 
