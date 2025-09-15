@@ -2,7 +2,9 @@
 package jwriter
 
 import (
+	"fmt"
 	"io"
+	"math"
 	"strconv"
 	"unicode/utf8"
 
@@ -248,11 +250,19 @@ func (w *Writer) Int64Str(n int64) {
 }
 
 func (w *Writer) Float32(n float32) {
+	if w.checkIsUnsupportedFloat(float64(n)) {
+		return
+	}
+
 	w.Buffer.EnsureSpace(20)
 	w.Buffer.Buf = strconv.AppendFloat(w.Buffer.Buf, float64(n), 'g', -1, 32)
 }
 
 func (w *Writer) Float32Str(n float32) {
+	if w.checkIsUnsupportedFloat(float64(n)) {
+		return
+	}
+
 	w.Buffer.EnsureSpace(20)
 	w.Buffer.Buf = append(w.Buffer.Buf, '"')
 	w.Buffer.Buf = strconv.AppendFloat(w.Buffer.Buf, float64(n), 'g', -1, 32)
@@ -260,11 +270,19 @@ func (w *Writer) Float32Str(n float32) {
 }
 
 func (w *Writer) Float64(n float64) {
+	if w.checkIsUnsupportedFloat(n) {
+		return
+	}
+
 	w.Buffer.EnsureSpace(20)
 	w.Buffer.Buf = strconv.AppendFloat(w.Buffer.Buf, n, 'g', -1, 64)
 }
 
 func (w *Writer) Float64Str(n float64) {
+	if w.checkIsUnsupportedFloat(n) {
+		return
+	}
+
 	w.Buffer.EnsureSpace(20)
 	w.Buffer.Buf = append(w.Buffer.Buf, '"')
 	w.Buffer.Buf = strconv.AppendFloat(w.Buffer.Buf, float64(n), 'g', -1, 64)
@@ -414,4 +432,13 @@ func (w *Writer) base64(in []byte) {
 	case 1:
 		w.Buffer.Buf = append(w.Buffer.Buf, byte(padChar), byte(padChar))
 	}
+}
+
+func (w *Writer) checkIsUnsupportedFloat(val float64) bool {
+	isUnsupported := math.IsNaN(val) || math.IsInf(val, 0)
+	if isUnsupported && w.Error == nil {
+		w.Error = fmt.Errorf("json: unsupported value: %v", val)
+	}
+
+	return isUnsupported
 }
